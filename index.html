@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CALOS x DUKI - ULTRA F1 🏁</title>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+  font-family: Arial;
+  color: white;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#track {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.line {
+  position: absolute;
+  width: 8px;
+  height: 60px;
+  background: white;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#car {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 42px;
+}
+
+.obstacle {
+  position: absolute;
+  font-size: 34px;
+}
+
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 14px;
+}
+
+#progressBar {
+  width: 180px;
+  height: 8px;
+  background: #333;
+  margin-top: 5px;
+}
+
+#progress {
+  height: 100%;
+  width: 0%;
+  background: #ff2e63;
+}
+
+#message {
+  position: absolute;
+  top: 35%;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  opacity: 0;
+  transition: 0.4s;
+  padding: 20px;
+}
+
+.show {
+  opacity: 1 !important;
+}
+
+#startScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  padding: 14px 22px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  background: #ff2e63;
+  color: white;
+  margin-top: 10px;
+}
+
+#nitroBtn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: orange;
+  text-align: center;
+  line-height: 90px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+  <div id="startScreen">
+    <h1>🏎️ CALOS</h1>
+    <p>ULTRA MODO F1 x DUKI</p>
+    <button onclick="startGame()">INICIAR</button>
+  </div>
+
+  <div id="track"></div>
+  <div id="car">🏎️</div>
+
+  <div id="hud">
+    Velocidad: <span id="speed">0</span><br>
+    Vueltas: <span id="laps">0</span>/3
+    <div id="progressBar"><div id="progress"></div></div>
+  </div>
+
+  <div id="message"></div>
+  <div id="nitroBtn">🔥</div>
+
+</div>
+
+<script>
+let car = document.getElementById("car");
+let track = document.getElementById("track");
+let speedText = document.getElementById("speed");
+let lapsText = document.getElementById("laps");
+let progressBar = document.getElementById("progress");
+let message = document.getElementById("message");
+let startScreen = document.getElementById("startScreen");
+let nitroBtn = document.getElementById("nitroBtn");
+
+let speed = 0;
+let baseMax = 220;
+let maxSpeed = baseMax;
+let progress = 0;
+let laps = 0;
+let playing = false;
+
+let carX = window.innerWidth / 2;
+let obstacles = [];
+let lines = [];
+
+// crear líneas
+for (let i = 0; i < 12; i++) {
+  let line = document.createElement("div");
+  line.classList.add("line");
+  line.style.top = (i * 90) + "px";
+  track.appendChild(line);
+  lines.push(line);
+}
+
+// CONTROL (sin bugs)
+function move(x){
+  carX = Math.max(30, Math.min(window.innerWidth - 30, x));
+}
+
+document.addEventListener("touchmove", e => move(e.touches[0].clientX), {passive:true});
+document.addEventListener("mousemove", e => move(e.clientX));
+
+// NITRO
+let nitro = false;
+
+nitroBtn.addEventListener("touchstart", ()=> nitro = true);
+nitroBtn.addEventListener("touchend", ()=> nitro = false);
+nitroBtn.addEventListener("mousedown", ()=> nitro = true);
+nitroBtn.addEventListener("mouseup", ()=> nitro = false);
+nitroBtn.addEventListener("mouseleave", ()=> nitro = false);
+
+// mensajes estilo DUKI 💜
+const frases = [
+"Modo diablo CALOS 😈",
+"Siempre real, nunca fake 💜",
+"El proceso también es victoria 🔥",
+"Nadie te regaló nada 😤",
+"Seguís porque podés 🏁"
+];
+
+function randomMsg(){
+  return frases[Math.floor(Math.random()*frases.length)];
+}
+
+function showMessage(text){
+  message.innerText = text;
+  message.classList.add("show");
+  setTimeout(()=>message.classList.remove("show"),1800);
+}
+
+// obstáculos
+function spawnObstacle(){
+  let obs = document.createElement("div");
+  obs.classList.add("obstacle");
+  obs.innerText = Math.random() < 0.5 ? "🚧" : "🚗";
+  obs.style.left = Math.random()*(window.innerWidth-40)+"px";
+  obs.style.top = "-50px";
+  track.appendChild(obs);
+  obstacles.push(obs);
+}
+
+// colisión precisa
+function collide(a,b){
+  let r1=a.getBoundingClientRect();
+  let r2=b.getBoundingClientRect();
+  return !(r1.right<r2.left||r1.left>r2.right||r1.bottom<r2.top||r1.top>r2.bottom);
+}
+
+function startGame(){
+  startScreen.style.display="none";
+  playing=true;
+  gameLoop();
+}
+
+function gameLoop(){
+  if(!playing)return;
+
+  // velocidad
+  if(nitro){
+    maxSpeed = baseMax + 120;
+    speed += 3;
+  } else {
+    maxSpeed = baseMax;
+    speed += 0.6;
+  }
+
+  speed -= 0.4;
+  speed = Math.max(0, Math.min(speed, maxSpeed));
+
+  // mover coche
+  car.style.left = carX + "px";
+
+  // líneas
+  lines.forEach(l=>{
+    let t=parseFloat(l.style.top);
+    t+=speed*0.2;
+    if(t>innerHeight)t=-60;
+    l.style.top=t+"px";
+  });
+
+  // obstáculos
+  if(Math.random()<0.025) spawnObstacle();
+
+  for(let i=obstacles.length-1;i>=0;i--){
+    let o=obstacles[i];
+    let t=parseFloat(o.style.top);
+    t+=speed*0.25;
+    o.style.top=t+"px";
+
+    if(collide(car,o)){
+      endGame("💥 Caíste… pero los reales vuelven más fuertes 💜");
+    }
+
+    if(t>innerHeight){
+      o.remove();
+      obstacles.splice(i,1);
+    }
+  }
+
+  // progreso
+  progress += speed*0.02;
+  progressBar.style.width = progress+"%";
+
+  if(progress>=100){
+    progress=0;
+    laps++;
+    lapsText.innerText=laps;
+
+    showMessage(randomMsg());
+
+    if(laps===3){
+      endGame("🏆 CALOS CAMPEÓN DEL MUNDO 🏆\n\nModo leyenda activado.\n\nTú el piloto… yo tu ingeniero 💜", true);
+    }
+  }
+
+  speedText.innerText=Math.floor(speed);
+
+  requestAnimationFrame(gameLoop);
+}
+
+function endGame(text,win=false){
+  playing=false;
+  message.innerText=text;
+  message.classList.add("show");
+
+  setTimeout(()=>location.reload(),4000);
+}
+</script>
+
+</body>
+</html>
