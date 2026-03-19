@@ -3,97 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CALOS - RED BULL F1 🏁</title>
+<title>CALOS x DUKI 🏁</title>
 
 <style>
-body {
-  margin: 0;
-  overflow: hidden;
-  background: black;
-  font-family: Arial;
-  color: white;
+body{
+  margin:0;
+  overflow:hidden;
+  background:black;
+  color:white;
+  font-family:Arial;
 }
 
-#game {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+#game{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
 }
 
-.line {
-  position: absolute;
-  width: 6px;
-  height: 60px;
-  background: white;
-  left: 50%;
-  transform: translateX(-50%);
+.line{
+  position:absolute;
+  width:6px;
+  height:60px;
+  background:white;
+  left:50%;
+  transform:translateX(-50%);
 }
 
-#car {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 44px;
-  filter: drop-shadow(0 0 10px #1e90ff);
+#car{
+  position:absolute;
+  bottom:100px;
+  font-size:44px;
+  filter:drop-shadow(0 0 10px #1e90ff);
 }
 
-.obstacle {
-  position: absolute;
-  font-size: 34px;
+.obstacle{
+  position:absolute;
+  font-size:34px;
 }
 
-#hud {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 14px;
+#hud{
+  position:absolute;
+  top:10px;
+  left:10px;
 }
 
-#progressBar {
-  width: 180px;
-  height: 8px;
-  background: #333;
+#progressBar{
+  width:180px;
+  height:8px;
+  background:#333;
 }
 
-#progress {
-  height: 100%;
-  width: 0%;
-  background: #1e90ff;
+#progress{
+  height:100%;
+  width:0%;
+  background:#a020f0;
 }
 
-#startScreen {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: black;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+#startScreen{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
 }
 
-button {
-  padding: 14px;
-  font-size: 18px;
-  background: #1e90ff;
-  border: none;
-  border-radius: 10px;
-  color: white;
+button{
+  padding:12px;
+  background:#a020f0;
+  border:none;
+  border-radius:10px;
+  color:white;
 }
 
-#nitroBtn {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 80px;
-  height: 80px;
-  background: orange;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 80px;
-  font-weight: bold;
+#nitroBtn{
+  position:absolute;
+  bottom:20px;
+  right:20px;
+  width:80px;
+  height:80px;
+  background:orange;
+  border-radius:50%;
+  text-align:center;
+  line-height:80px;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -102,81 +98,101 @@ button {
 
 <div id="game">
 
-  <div id="startScreen">
-    <h1>🏎️ CALOS</h1>
-    <p>RED BULL F1 MODE 🔵</p>
-    <button onclick="startGame()">INICIAR</button>
-  </div>
+<div id="startScreen">
+<h1>🏎️ CALOS</h1>
+<p>Modo historia activado 💜</p>
+<button onclick="startGame()">INICIAR</button>
+</div>
 
-  <div id="car">🏎️</div>
+<div id="car">🏎️</div>
 
-  <div id="hud">
-    Velocidad: <span id="speed">0</span><br>
-    Vueltas: <span id="laps">0</span>/3
-    <div id="progressBar"><div id="progress"></div></div>
-  </div>
+<div id="hud">
+Velocidad: <span id="speed">0</span><br>
+Vueltas: <span id="laps">0</span>/10
+<div id="progressBar"><div id="progress"></div></div>
+</div>
 
-  <div id="nitroBtn">🔥</div>
+<div id="nitroBtn">🔥</div>
 
 </div>
 
 <script>
-let car = document.getElementById("car");
-let speedText = document.getElementById("speed");
-let lapsText = document.getElementById("laps");
-let progressBar = document.getElementById("progress");
-let startScreen = document.getElementById("startScreen");
-let nitroBtn = document.getElementById("nitroBtn");
+let car=document.getElementById("car");
+let speedText=document.getElementById("speed");
+let lapsText=document.getElementById("laps");
+let progressBar=document.getElementById("progress");
+let startScreen=document.getElementById("startScreen");
+let nitroBtn=document.getElementById("nitroBtn");
+let game=document.getElementById("game");
 
-let carX = window.innerWidth / 2;
-let speed = 0;
-let maxSpeed = 200;
-let progress = 0;
-let laps = 0;
-let playing = false;
-let nitro = false;
+let carX=window.innerWidth/2;
+let speed=0;
+let progress=0;
+let laps=0;
+let nitro=false;
+let playing=false;
 
-let obstacles = [];
-let lines = [];
+let obstacles=[];
+let lines=[];
+
+// FRASES (de tu texto 💜)
+const loseMessages = [
+"Si algún día necesitas algo… aquí voy a estar 💜",
+"No estás solo cuando más lo necesitas",
+"No apagues esa chispa que tienes 🔥",
+"Todavía te quedan muchas vueltas por correr 🏁",
+"Hay muchas metas que aún puedes alcanzar",
+"Y muchas historias que todavía te esperan",
+"Cuando sientas que no puedes más… levántate",
+"Acuérdate de esto…",
+"Tú el piloto…",
+"Yo tu ingeniero… peleando hasta el final 🏆"
+];
+
+function randomLoseMsg(){
+  return loseMessages[Math.floor(Math.random()*loseMessages.length)];
+}
 
 // líneas
 for(let i=0;i<10;i++){
   let l=document.createElement("div");
   l.className="line";
   l.style.top=(i*100)+"px";
-  document.body.appendChild(l);
+  game.appendChild(l);
   lines.push(l);
 }
 
-// CONTROL REAL (ARREGLADO)
+// CONTROL
 function setPosition(x){
-  carX = Math.max(40, Math.min(window.innerWidth - 40, x));
+  carX = Math.max(40, Math.min(window.innerWidth-40, x));
 }
 
-// TOUCH
-document.addEventListener("touchmove", e=>{
+document.addEventListener("touchstart",e=>{
   setPosition(e.touches[0].clientX);
-}, {passive:true});
+},{passive:true});
 
-// MOUSE
-document.addEventListener("mousemove", e=>{
+document.addEventListener("touchmove",e=>{
+  setPosition(e.touches[0].clientX);
+},{passive:true});
+
+document.addEventListener("mousemove",e=>{
   setPosition(e.clientX);
 });
 
 // NITRO
-nitroBtn.addEventListener("touchstart", ()=> nitro=true);
-nitroBtn.addEventListener("touchend", ()=> nitro=false);
-nitroBtn.addEventListener("mousedown", ()=> nitro=true);
-nitroBtn.addEventListener("mouseup", ()=> nitro=false);
+nitroBtn.addEventListener("touchstart",()=>nitro=true);
+nitroBtn.addEventListener("touchend",()=>nitro=false);
+nitroBtn.addEventListener("mousedown",()=>nitro=true);
+nitroBtn.addEventListener("mouseup",()=>nitro=false);
 
 // obstáculos
 function spawnObstacle(){
   let o=document.createElement("div");
   o.className="obstacle";
   o.innerText="🚧";
-  o.style.left=Math.random()*window.innerWidth+"px";
+  o.style.left=Math.random()*(window.innerWidth-40)+"px";
   o.style.top="-50px";
-  document.body.appendChild(o);
+  game.appendChild(o);
   obstacles.push(o);
 }
 
@@ -196,10 +212,9 @@ function startGame(){
 function loop(){
   if(!playing)return;
 
-  // velocidad
   speed += nitro ? 2 : 0.5;
   speed -= 0.3;
-  speed = Math.max(0, Math.min(speed, nitro ? 300 : maxSpeed));
+  speed = Math.max(0, Math.min(speed, nitro ? 300 : 200));
 
   car.style.left = carX + "px";
 
@@ -214,13 +229,15 @@ function loop(){
   // spawn
   if(Math.random()<0.02) spawnObstacle();
 
-  obstacles.forEach((o,i)=>{
+  // obstáculos
+  for(let i=obstacles.length-1;i>=0;i--){
+    let o=obstacles[i];
     let t=parseFloat(o.style.top);
     t+=speed*0.3;
     o.style.top=t+"px";
 
     if(collide(car,o)){
-      alert("💥 Perdiste");
+      alert("💥 " + randomLoseMsg());
       location.reload();
     }
 
@@ -228,7 +245,7 @@ function loop(){
       o.remove();
       obstacles.splice(i,1);
     }
-  });
+  }
 
   // progreso
   progress += speed*0.02;
@@ -238,6 +255,12 @@ function loop(){
     progress=0;
     laps++;
     lapsText.innerText=laps;
+
+    // FINAL
+    if(laps===10){
+      alert("🏆 CALOS CAMPEÓN 🏆\n\nTú el piloto…\nYo tu ingeniero…\nY los dos hasta el final 💜");
+      location.reload();
+    }
   }
 
   speedText.innerText=Math.floor(speed);
